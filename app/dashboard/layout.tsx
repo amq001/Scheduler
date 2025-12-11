@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { Button } from "../../components/ui/button";
 import {
@@ -12,26 +13,32 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet";
+import { Toaster } from "../../components/ui/sonner";
 import Logo from "../../public/logo.png";
 import { DashboardLinks } from "../customComponents/DashboardLinks";
 import { ThemeToggle } from "../customComponents/ThemeToggle";
 import { signOut } from "../lib/auth";
-import { requireUser } from "../lib/hooks";
-import { redirect } from "next/navigation";
 import { prisma } from "../lib/db";
+import { requireUser } from "../lib/hooks";
 
-async function getData(userId: string){
+async function getData(userId: string) {
   const data = await prisma.user.findUnique({
     where: {
       id: userId,
     },
     select: {
       userName: true,
+      grantId: true,
     },
   });
   if (!data?.userName) {
-    return redirect("/onboarding")
+    return redirect("/onboarding");
   }
+
+  if (!data?.grantId) {
+    return redirect("/onboarding/grant-id");
+  }
+
   return data;
 }
 
@@ -126,6 +133,7 @@ export default async function DashboardLayout({
           </main>
         </div>
       </div>
+      <Toaster richColors closeButton />
     </>
   );
 }
